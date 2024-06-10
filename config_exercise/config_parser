@@ -1,0 +1,38 @@
+def parse_config(path):
+  config = dict()
+  current_section = None
+
+  with open(path, 'r') as f:
+    for line in f:
+      line = line.strip() 
+     
+      
+      if not line or line.startswith('#'):
+        continue
+
+      if line.startswith('[') and line.endswith(']'):
+        current_section = line[1:-1].lower() 
+        config[current_section] = {} 
+      
+      elif '=' in line:
+        key, value = line.split('=', 1)
+        key = key.strip().lower()  
+        value = value.strip() if ";" not in value else value.strip().split(";")[0].strip()
+
+        try:
+          value = int(value)
+        except ValueError:
+          try:
+            value = float(value)
+          except ValueError:
+            if value.lower() in ('true', 'false'):
+              value = value.lower() == 'true'
+          
+        if current_section is not None:
+          config[current_section][key] = value
+        else:
+          raise ValueError("Key-value pair found outside a section")
+
+  return config
+result = parse_config("generic.ini")
+print(result)
